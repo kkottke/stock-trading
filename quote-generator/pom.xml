@@ -14,11 +14,15 @@
 	<packaging>jar</packaging>
 
 	<properties>
-		<main.verticle/>
+		<main.verticle>de.kkottke.stocktrading.generator.MainGeneratorVerticle</main.verticle>
 	</properties>
 
 	<dependencies>
-
+		<dependency>
+			<groupId>de.kkottke.stock-trading</groupId>
+			<artifactId>common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -28,6 +32,10 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>io.reactiverse</groupId>
+				<artifactId>vertx-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>

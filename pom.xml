@@ -179,6 +179,7 @@
 					<artifactId>vertx-maven-plugin</artifactId>
 					<version>1.0.18</version>
 					<configuration>
+						<launcher>de.kkottke.stocktrading.common.Launcher</launcher>
 						<verticle>${main.verticle}</verticle>
 						<redeploy>true</redeploy>
 					</configuration>
