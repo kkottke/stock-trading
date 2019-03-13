@@ -16,7 +16,7 @@ public class Launcher extends io.vertx.core.Launcher {
     @Override
     public void beforeStartingVertx(VertxOptions options) {
         log.debug("enable clustering");
-        options.setClustered(true).setClusterHost("localhost");
+        options.setClustered(true);
     }
 
 }

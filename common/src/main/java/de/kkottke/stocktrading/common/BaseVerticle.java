@@ -25,6 +25,7 @@ public class BaseVerticle extends AbstractVerticle {
     public Completable rxStart() {
         Future<Void> future = Future.future();
         ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions().setBackendConfiguration(config()), svcDiscovery -> {
+            log.debug("service discovery is initialized");
             this.serviceDiscovery = svcDiscovery;
             future.complete();
         });
