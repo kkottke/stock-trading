@@ -2,17 +2,24 @@ package de.kkottke.stocktrading.generator;
 
 import de.kkottke.stocktrading.common.model.Quote;
 import io.reactivex.Completable;
+import io.reactivex.Single;
 import io.vertx.core.json.Json;
 import io.vertx.reactivex.core.AbstractVerticle;
+import io.vertx.reactivex.ext.web.Router;
+import io.vertx.reactivex.ext.web.RoutingContext;
+import io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.http.HttpStatus.SC_OK;
+
 @Slf4j
 public class RestApiVerticle extends AbstractVerticle {
 
-    public static final int DEFAULT_PORT = 8080;
+    static final int DEFAULT_PORT = 8080;
+    private static final String PORT = "HTTP_PORT";
 
     private Map<String, Quote> quotes = new HashMap<>();
 
@@ -32,10 +39,25 @@ public class RestApiVerticle extends AbstractVerticle {
     }
 
     private Completable startServer() {
-        return vertx.createHttpServer()
-                    .requestHandler(request -> request.response().end(Json.encodePrettily(quotes)))
-                    .rxListen(config().getInteger("HTTP_PORT", DEFAULT_PORT))
-                    .ignoreElement()
-                    .doOnComplete(() -> log.info("rest api is listening"));
+        final int port = config().getInteger(PORT, DEFAULT_PORT);
+        Single<Router> routerSingle = OpenAPI3RouterFactory.rxCreate(vertx, "api/swagger.yaml").map(routerFactory -> {
+            registerOperations(routerFactory);
+            return routerFactory.getRouter();
+        });
+
+        return routerSingle.flatMap(router -> vertx.createHttpServer().requestHandler(router).rxListen(port))
+                           .ignoreElement()
+                           .doOnComplete(() -> log.info("rest api is listening on {}", port));
+    }
+
+    private void registerOperations(OpenAPI3RouterFactory routerFactory) {
+        routerFactory.addHandlerByOperationId("getQuotes", this::handleGetQuotes);
+    }
+
+    private void handleGetQuotes(RoutingContext context) {
+        context.response()
+               .putHeader("content-type", "application/json")
+               .setStatusCode(SC_OK)
+               .end(Json.encodePrettily(quotes));
     }
 }

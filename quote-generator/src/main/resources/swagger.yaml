@@ -1,0 +1,66 @@
+openapi: '3.0.0'
+info:
+  version: 1.0.0
+  title: Market Data API
+tags:
+  - name: "market-data"
+    description: "Access to market data"
+paths:
+  /quotes:
+    get:
+      summary: Get current quotes
+      operationId: getQuotes
+      tags:
+        - quotes
+      responses:
+        '200':
+          description: The current quotes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quote'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Quote:
+      description: Representation of a quote.
+      required:
+        - name
+        - price
+      properties:
+        name:
+          description: Name of the corresponding company
+          readOnly: true
+          type: string
+        price:
+          description: Current stock price
+          readOnly: true
+          type: double
+        quoteTime:
+          description: The date and time the quote was created.
+          readOnly: true
+          type: string
+          format: date-time
+      additionalProperties: false
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

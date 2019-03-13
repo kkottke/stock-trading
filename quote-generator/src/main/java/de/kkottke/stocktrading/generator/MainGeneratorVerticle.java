@@ -65,7 +65,7 @@ public class MainGeneratorVerticle extends BaseVerticle {
     private Completable registerServices(Single<JsonObject> config) {
         Completable registerGenerator = rxPublishMessageSource("market-data-stream", QuoteGeneratorVerticle.ADDRESS).ignoreElement();
         // TODO: Ugly, i know. Refactor to shared service discovery
-        Completable registerApi = config.map(conf -> rxPublishHttpEndpoint("market-data-api", "localhost", conf.getInteger("HTTP_PORT", DEFAULT_PORT), "/")).ignoreElement();
+        Completable registerApi = config.map(conf -> rxPublishHttpEndpoint("market-data-api", "localhost", conf.getInteger("HTTP_PORT", DEFAULT_PORT), "/quotes")).ignoreElement();
 
         return Completable.mergeArray(registerGenerator, registerApi);
     }
