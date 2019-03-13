@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BaseVerticle extends AbstractVerticle {
 
-    protected ServiceDiscovery serviceDiscovery;
+    private ServiceDiscovery serviceDiscovery;
     private Set<Record> registeredServices = new HashSet<>();
 
     @Override
@@ -33,7 +33,7 @@ public class BaseVerticle extends AbstractVerticle {
         return future.rxSetHandler().ignoreElement();
     }
 
-    public Single<Record> rxPublishMessageSource(String name, String address) {
+    protected Single<Record> rxPublishMessageSource(String name, String address) {
         log.debug("publish message source {} on address {}", name, address);
         Record record = MessageSource.createRecord(name, address);
         return serviceDiscovery.rxPublish(record)

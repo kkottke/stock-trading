@@ -32,7 +32,7 @@ public class QuoteGeneratorVerticle extends AbstractVerticle {
         this.quote = new Quote(company.getName(), company.getPrice(), ZonedDateTime.now());
 
         long delay = config().getLong(CONFIG_DELAY, DEFAULT_DELAY);
-        log.info("start quote generator for company {} every {}ms", company.getName(), delay);
+        log.info("starting quote generator for company {} every {}ms", company.getName(), delay);
         vertx.setPeriodic(delay, handler -> {
             quote = strategy.generateNext(quote);
             publishQuote(quote);

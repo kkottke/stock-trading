@@ -6,11 +6,8 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 
-public class CustomDateSerializer extends StdSerializer<ZonedDateTime> {
-
-    private static DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
+public class CustomDateSerializer extends StdSerializer<ZonedDateTime> implements CustomDeSer {
 
     public CustomDateSerializer() {
         this(null);

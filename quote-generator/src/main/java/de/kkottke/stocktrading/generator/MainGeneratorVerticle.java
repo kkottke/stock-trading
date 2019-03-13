@@ -32,18 +32,33 @@ public class MainGeneratorVerticle extends BaseVerticle {
         log.debug("starting MainVerticle");
         Completable parentCompletable = super.rxStart();
 
-        Flowable<JsonObject> retrievedConfig = ConfigRetriever.create(vertx)
+        Single<JsonObject> retrievedConfig = ConfigRetriever.create(vertx)
                                                               .rxGetConfig()
-                                                              .toFlowable();
-        Completable deployGenerators = retrievedConfig.flatMap(config -> Flowable.fromArray(Company.values())
-                                                                                 .map(company -> new DeploymentOptions().setConfig(config.copy()
-                                                                                                                                         .put(CONFIG_COMPANY, company.name()))))
-                                                      .map(option -> vertx.rxDeployVerticle(QuoteGeneratorVerticle::new, option))
-                                                      .map(Single::ignoreElement)
-                                                      .flatMapCompletable(verticle -> verticle);
+                                                              .cache();
+        Completable deployGenerators = deployGeneratorVerticles(retrievedConfig);
+        Completable deployApi = deployApiVerticle(retrievedConfig);
 
         Completable registerGenerator = rxPublishMessageSource("market-data-stream", QuoteGeneratorVerticle.ADDRESS).ignoreElement();
 
-        return parentCompletable.andThen(deployGenerators).andThen(registerGenerator);
+        return parentCompletable.andThen(deployGenerators)
+                                .andThen(deployApi)
+                                .andThen(registerGenerator);
+    }
+
+    private Completable deployGeneratorVerticles(Single<JsonObject> config) {
+        return config.toFlowable()
+                     .flatMap(conf -> Flowable.fromArray(Company.values())
+                                              .map(company -> new DeploymentOptions().setConfig(conf.copy()
+                                                                                                    .put(CONFIG_COMPANY, company.name()))))
+                     .map(option -> vertx.rxDeployVerticle(QuoteGeneratorVerticle::new, option))
+                     .map(Single::ignoreElement)
+                     .flatMapCompletable(verticle -> verticle);
+    }
+
+    private Completable deployApiVerticle(Single<JsonObject> config) {
+        return config.map(conf -> new DeploymentOptions().setConfig(conf))
+                     .map(option -> vertx.rxDeployVerticle(RestApiVerticle::new, option))
+                     .map(Single::ignoreElement)
+                     .flatMapCompletable(verticle -> verticle);
     }
 }
