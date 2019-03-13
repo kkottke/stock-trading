@@ -42,6 +42,8 @@ public class MainGeneratorVerticle extends BaseVerticle {
                                                       .map(Single::ignoreElement)
                                                       .flatMapCompletable(verticle -> verticle);
 
-        return parentCompletable.andThen(deployGenerators);
+        Completable registerGenerator = rxPublishMessageSource("market-data-stream", QuoteGeneratorVerticle.ADDRESS).ignoreElement();
+
+        return parentCompletable.andThen(deployGenerators).andThen(registerGenerator);
     }
 }

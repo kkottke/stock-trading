@@ -37,7 +37,10 @@ public class BaseVerticle extends AbstractVerticle {
         log.debug("publish message source {} on address {}", name, address);
         Record record = MessageSource.createRecord(name, address);
         return serviceDiscovery.rxPublish(record)
-                               .doOnSuccess(registeredServices::add);
+                               .doOnSuccess(service -> {
+                                   log.info("service {} is registered", service.getName());
+                                   registeredServices.add(service);
+                               });
     }
 
     @Override
