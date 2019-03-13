@@ -11,6 +11,7 @@ import io.vertx.reactivex.core.Vertx;
 import lombok.extern.slf4j.Slf4j;
 
 import static de.kkottke.stocktrading.generator.QuoteGeneratorVerticle.CONFIG_COMPANY;
+import static de.kkottke.stocktrading.generator.RestApiVerticle.DEFAULT_PORT;
 
 @Slf4j
 @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -29,20 +30,19 @@ public class MainGeneratorVerticle extends BaseVerticle {
 
     @Override
     public Completable rxStart() {
-        log.debug("starting MainVerticle");
+        log.debug("starting MainGeneratorVerticle");
         Completable parentCompletable = super.rxStart();
 
         Single<JsonObject> retrievedConfig = ConfigRetriever.create(vertx)
-                                                              .rxGetConfig()
-                                                              .cache();
-        Completable deployGenerators = deployGeneratorVerticles(retrievedConfig);
-        Completable deployApi = deployApiVerticle(retrievedConfig);
+                                                            .rxGetConfig()
+                                                            .cache();
+        Completable deployments = Flowable.fromArray(
+            deployGeneratorVerticles(retrievedConfig),
+            deployApiVerticle(retrievedConfig),
+            registerServices(retrievedConfig)
+        ).flatMapCompletable(comp -> comp);
 
-        Completable registerGenerator = rxPublishMessageSource("market-data-stream", QuoteGeneratorVerticle.ADDRESS).ignoreElement();
-
-        return parentCompletable.andThen(deployGenerators)
-                                .andThen(deployApi)
-                                .andThen(registerGenerator);
+        return parentCompletable.andThen(deployments);
     }
 
     private Completable deployGeneratorVerticles(Single<JsonObject> config) {
@@ -60,5 +60,13 @@ public class MainGeneratorVerticle extends BaseVerticle {
                      .map(option -> vertx.rxDeployVerticle(RestApiVerticle::new, option))
                      .map(Single::ignoreElement)
                      .flatMapCompletable(verticle -> verticle);
+    }
+
+    private Completable registerServices(Single<JsonObject> config) {
+        Completable registerGenerator = rxPublishMessageSource("market-data-stream", QuoteGeneratorVerticle.ADDRESS).ignoreElement();
+        // TODO: Ugly, i know. Refactor to shared service discovery
+        Completable registerApi = config.map(conf -> rxPublishHttpEndpoint("market-data-api", "localhost", conf.getInteger("HTTP_PORT", DEFAULT_PORT), "/")).ignoreElement();
+
+        return Completable.mergeArray(registerGenerator, registerApi);
     }
 }

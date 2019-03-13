@@ -5,6 +5,7 @@ import io.reactivex.Single;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.core.Future;
 import io.vertx.reactivex.servicediscovery.ServiceDiscovery;
+import io.vertx.reactivex.servicediscovery.types.HttpEndpoint;
 import io.vertx.reactivex.servicediscovery.types.MessageSource;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
@@ -36,6 +37,16 @@ public class BaseVerticle extends AbstractVerticle {
     protected Single<Record> rxPublishMessageSource(String name, String address) {
         log.debug("publish message source {} on address {}", name, address);
         Record record = MessageSource.createRecord(name, address);
+        return publish(record);
+    }
+
+    protected Single<Record> rxPublishHttpEndpoint(String name, String host, int port, String path) {
+        log.debug("publish http endpoint {} on {}:{} with path {}", name, host, port, path);
+        Record record = HttpEndpoint.createRecord(name, host, port, path);
+        return publish(record);
+    }
+
+    private Single<Record> publish(Record record) {
         return serviceDiscovery.rxPublish(record)
                                .doOnSuccess(service -> {
                                    log.info("service {} is registered", service.getName());

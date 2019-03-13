@@ -12,7 +12,7 @@ import java.util.Map;
 @Slf4j
 public class RestApiVerticle extends AbstractVerticle {
 
-    private static final int DEFAULT_PORT = 8080;
+    public static final int DEFAULT_PORT = 8080;
 
     private Map<String, Quote> quotes = new HashMap<>();
 
