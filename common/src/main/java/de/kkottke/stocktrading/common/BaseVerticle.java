@@ -5,6 +5,7 @@ import io.reactivex.Single;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.core.Future;
 import io.vertx.reactivex.servicediscovery.ServiceDiscovery;
+import io.vertx.reactivex.servicediscovery.types.EventBusService;
 import io.vertx.reactivex.servicediscovery.types.HttpEndpoint;
 import io.vertx.reactivex.servicediscovery.types.MessageSource;
 import io.vertx.servicediscovery.Record;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BaseVerticle extends AbstractVerticle {
 
-    private ServiceDiscovery serviceDiscovery;
+    protected ServiceDiscovery serviceDiscovery;
     private Set<Record> registeredServices = new HashSet<>();
 
     @Override
@@ -37,6 +38,12 @@ public class BaseVerticle extends AbstractVerticle {
     protected Single<Record> rxPublishMessageSource(String name, String address) {
         log.debug("publish message source {} on address {}", name, address);
         Record record = MessageSource.createRecord(name, address);
+        return publish(record);
+    }
+
+    protected Single<Record> rxPublishService(String name, String address, String className) {
+        log.debug("publish service {} on address {}", name, address);
+        Record record = EventBusService.createRecord(name, address, className);
         return publish(record);
     }
 

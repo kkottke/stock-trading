@@ -26,7 +26,7 @@ public class SimpleGeneratorStrategy implements GeneratorStrategy {
             nextPrice += random.nextInt(variation);
         } else {
             // decrease price
-            nextPrice -= random.nextInt(variation);
+            nextPrice -= Math.min(price, random.nextInt(variation));
         }
 
         return nextPrice;
