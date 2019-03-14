@@ -13,9 +13,9 @@ import static de.kkottke.stocktrading.generator.Company.AWESOME_PRODUCTS_CORP;
 @Slf4j
 public class QuoteGeneratorVerticle extends AbstractVerticle {
 
-    public static final String ADDRESS = "market-data";
-    public static final String CONFIG_DELAY = "GENERATOR_DELAY";
-    public static final String CONFIG_COMPANY = "GENERATOR_COMPANY";
+    static final String ADDRESS = "market-data";
+    private static final String CONFIG_DELAY = "GENERATOR_DELAY";
+    static final String CONFIG_COMPANY = "GENERATOR_COMPANY";
 
     private static final long DEFAULT_DELAY = 2000L;
     private static final String DEFAULT_COMPANY = AWESOME_PRODUCTS_CORP.name();
@@ -29,7 +29,7 @@ public class QuoteGeneratorVerticle extends AbstractVerticle {
         this.eventBus = vertx.eventBus();
         Company company = Company.valueOf(config().getString(CONFIG_COMPANY, DEFAULT_COMPANY));
         this.strategy = new SimpleGeneratorStrategy(company.getVariation());
-        this.quote = new Quote(company.getName(), company.getPrice(), ZonedDateTime.now());
+        this.quote = new Quote(company.getName(), company.getSymbol(), company.getPrice(), ZonedDateTime.now());
 
         long delay = config().getLong(CONFIG_DELAY, DEFAULT_DELAY);
         log.info("starting quote generator for company {} every {}ms", company.getName(), delay);
@@ -40,7 +40,6 @@ public class QuoteGeneratorVerticle extends AbstractVerticle {
     }
 
     private void publishQuote(Quote quote) {
-        log.debug("publish new quote for {} on the event bus", quote.getName());
         eventBus.publish(ADDRESS, Json.encode(quote));
     }
 }

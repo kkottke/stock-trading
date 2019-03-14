@@ -10,13 +10,13 @@ public class SimpleGeneratorStrategy implements GeneratorStrategy {
     private final int variation;
     private final Random random = new Random();
 
-    public SimpleGeneratorStrategy(final int variation) {
+    SimpleGeneratorStrategy(final int variation) {
         this.variation = variation;
     }
 
     @Override
     public Quote generateNext(Quote quote) {
-        return new Quote(quote.getName(), generateNextPrice(quote.getPrice()), ZonedDateTime.now());
+        return new Quote(quote.getName(), quote.getSymbol(), generateNextPrice(quote.getPrice()), ZonedDateTime.now());
     }
 
     private double generateNextPrice(double price) {

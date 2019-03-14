@@ -27,6 +27,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /quotes/{stock}:
+    get:
+      summary: Get current quote of specific stock
+      operationId: getQuote
+      tags:
+        - quotes
+      parameters:
+        - name: stock
+          in: path
+          required: true
+          description: The name of the stock
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The current quote of requested stock
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+        '404':
+          description: Requested resource could not be found
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     Quote:
@@ -36,7 +64,7 @@ components:
         - price
       properties:
         name:
-          description: Name of the corresponding company
+          description: Name of the corresponding stock
           readOnly: true
           type: string
         price:

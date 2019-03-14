@@ -16,6 +16,7 @@ import java.time.ZonedDateTime;
 public class Quote {
 
     private String name;
+    private String symbol;
     private double price;
     @JsonSerialize(using = CustomDateSerializer.class)
     @JsonDeserialize(using = CustomDateDeserializer.class)
