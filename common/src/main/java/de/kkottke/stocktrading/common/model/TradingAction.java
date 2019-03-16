@@ -1,4 +1,4 @@
-package de.kkottke.stocktrading.trading.model;
+package de.kkottke.stocktrading.common.model;
 
 public enum TradingAction {
 

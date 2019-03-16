@@ -1,5 +1,6 @@
 package de.kkottke.stocktrading.generator;
 
+import de.kkottke.stocktrading.common.model.Company;
 import de.kkottke.stocktrading.common.model.Quote;
 import io.vertx.core.json.Json;
 import io.vertx.reactivex.core.AbstractVerticle;
@@ -8,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.ZonedDateTime;
 
-import static de.kkottke.stocktrading.generator.Company.AWESOME_PRODUCTS_CORP;
+import static de.kkottke.stocktrading.common.model.Company.AWESOME_PRODUCTS_CORP;
 
 @Slf4j
 public class QuoteGeneratorVerticle extends AbstractVerticle {

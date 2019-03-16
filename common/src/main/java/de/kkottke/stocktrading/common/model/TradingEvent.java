@@ -1,6 +1,5 @@
-package de.kkottke.stocktrading.trading.model;
+package de.kkottke.stocktrading.common.model;
 
-import de.kkottke.stocktrading.common.model.Quote;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

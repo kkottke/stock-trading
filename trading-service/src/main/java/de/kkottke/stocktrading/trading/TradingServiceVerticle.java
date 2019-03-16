@@ -1,7 +1,7 @@
 package de.kkottke.stocktrading.trading;
 
 import de.kkottke.stocktrading.common.model.Quote;
-import de.kkottke.stocktrading.trading.model.TradingEvent;
+import de.kkottke.stocktrading.common.model.TradingEvent;
 import io.reactivex.Maybe;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -16,8 +16,8 @@ import io.vertx.reactivex.servicediscovery.types.HttpEndpoint;
 import io.vertx.serviceproxy.ServiceBinder;
 import lombok.extern.slf4j.Slf4j;
 
-import static de.kkottke.stocktrading.trading.model.TradingAction.BUY;
-import static de.kkottke.stocktrading.trading.model.TradingAction.SELL;
+import static de.kkottke.stocktrading.common.model.TradingAction.BUY;
+import static de.kkottke.stocktrading.common.model.TradingAction.SELL;
 import static org.apache.http.HttpStatus.SC_OK;
 
 @Slf4j
@@ -25,7 +25,7 @@ public class TradingServiceVerticle extends AbstractVerticle implements TradingS
 
     private static final String CONFIG_CASH = "TRADING_INITIAL_CASH";
 
-    private static final double DEFAULT_CASH = 10000;
+    private static final double DEFAULT_CASH = 100000;
 
     private Portfolio portfolio;
     private ServiceDiscovery serviceDiscovery;

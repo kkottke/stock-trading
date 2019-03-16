@@ -1,6 +1,7 @@
 package de.kkottke.stocktrading.generator;
 
 import de.kkottke.stocktrading.common.BaseVerticle;
+import de.kkottke.stocktrading.common.model.Company;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
