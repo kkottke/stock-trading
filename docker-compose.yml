@@ -52,17 +52,6 @@ services:
     networks:
       - stock-trading-net
 
-  # Kibana initialization container
-  init_kibana:
-    container_name: init_kibana
-    image: "docker.elastic.co/kibana/kibana:${ELASTIC_VERSION}"
-    command: curl -X POST -H "Content-type:application/json" -H "kbn-xsrf:true" -u elastic:changeme "http://kibana:5601/api/kibana/settings/defaultIndex" -d '{"value":"audit-*"}'
-    # We don't start Kibana until the ES instance is ready
-    depends_on:
-      kibana: { condition: service_healthy }
-    networks:
-      - stock-trading-net
-
 volumes:
   # Elasticsearch data
   es-data:

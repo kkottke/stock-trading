@@ -39,12 +39,14 @@ public class AuditVerticle extends BaseVerticle {
     private void handleQuote(Message<JsonObject> message) {
         webClient.post("audit/_doc/")
                  .rxSendJsonObject(message.body())
-                 .doOnError(error -> log.warn("persist quote failed: {}", error.getMessage())).subscribe();
+                 .doOnError(error -> log.warn("persisting quote failed: {}", error.getMessage())).subscribe();
     }
 
     private void handleTrade(Message<String> message) {
         TradingEvent trade = Json.decodeValue(message.body(), TradingEvent.class);
-        log.info("receive trade: {}", Json.encode(trade));
+        webClient.post("trade/_doc/")
+                 .rxSendJson(trade)
+                 .doOnError(error -> log.warn("persisting trade failed: {}", error.getMessage())).subscribe();
     }
 
 }
