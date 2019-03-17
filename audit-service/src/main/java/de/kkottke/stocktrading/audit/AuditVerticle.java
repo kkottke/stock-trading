@@ -1,22 +1,30 @@
 package de.kkottke.stocktrading.audit;
 
 import de.kkottke.stocktrading.common.BaseVerticle;
-import de.kkottke.stocktrading.common.model.Quote;
 import de.kkottke.stocktrading.common.model.TradingEvent;
 import io.reactivex.Completable;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.reactivex.core.eventbus.Message;
+import io.vertx.reactivex.ext.web.client.WebClient;
 import io.vertx.reactivex.servicediscovery.types.MessageSource;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class AuditVerticle extends BaseVerticle {
 
+    private static final String DEFAULT_ES_HOST = "localhost";
+    private static final int DEFAULT_ES_PORT = 9200;
+
+    private WebClient webClient;
+
     @Override
     public Completable rxStart() {
         log.debug("starting AuditVerticle");
         Completable parentCompletable = super.rxStart();
+
+        webClient = WebClient.create(vertx, new WebClientOptions().setDefaultHost(DEFAULT_ES_HOST).setDefaultPort(DEFAULT_ES_PORT));
 
         Completable quoteConsumer = MessageSource.<JsonObject>rxGetConsumer(serviceDiscovery, new JsonObject().put("name", "market-data-stream"))
             .map(consumer -> consumer.handler(this::handleQuote))
@@ -29,12 +37,14 @@ public class AuditVerticle extends BaseVerticle {
     }
 
     private void handleQuote(Message<JsonObject> message) {
-        Quote quote = Json.decodeValue(message.body().encode(), Quote.class);
-        log.info("receive quote: {}", Json.encode(quote));
+        webClient.post("audit/_doc/")
+                 .rxSendJsonObject(message.body())
+                 .doOnError(error -> log.warn("persist quote failed: {}", error.getMessage())).subscribe();
     }
 
     private void handleTrade(Message<String> message) {
         TradingEvent trade = Json.decodeValue(message.body(), TradingEvent.class);
         log.info("receive trade: {}", Json.encode(trade));
     }
+
 }
