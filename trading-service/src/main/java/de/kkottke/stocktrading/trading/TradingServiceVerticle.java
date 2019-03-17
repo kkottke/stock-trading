@@ -60,12 +60,16 @@ public class TradingServiceVerticle extends AbstractVerticle implements TradingS
             portfolio.setCash(portfolio.getCash() - price);
             int currentAmount = portfolio.getShares().getOrDefault(name, 0);
             portfolio.getShares().put(name, currentAmount + amount);
+
+            log.info("buy {} stocks of {} worth {}", amount, name, price);
             publishTradingEvent(new TradingEvent(BUY, quote, amount));
 
             // TODO update portfolio value
             resultHandler.handle(Future.succeededFuture(portfolio));
         } else {
-            resultHandler.handle(Future.failedFuture(String.format("not enough money: %s (cash) < %s (price)", portfolio.getCash(), price)));
+            String message = String.format("reject purchase request: insufficient cash %s (cash) < %s (price)", portfolio.getCash(), price);
+            log.warn(message);
+            resultHandler.handle(Future.failedFuture(message));
         }
 
         return this;
@@ -89,12 +93,16 @@ public class TradingServiceVerticle extends AbstractVerticle implements TradingS
                 portfolio.getShares().put(name, newAmount);
             }
             portfolio.setCash(portfolio.getCash() + price);
+
+            log.info("sell {} stocks of {} worth {}", amount, name, price);
             publishTradingEvent(new TradingEvent(SELL, quote, amount));
 
             // TODO update portfolio value
             resultHandler.handle(Future.succeededFuture(portfolio));
         } else {
-            resultHandler.handle(Future.failedFuture(String.format("not enough stocks: %s (owned) < %s (amount)", currentAmount, amount)));
+            String message = String.format("reject sale request: insufficient stocks %s (owned) < %s (amount)", currentAmount, amount);
+            log.warn(message);
+            resultHandler.handle(Future.failedFuture(message));
         }
 
         return this;

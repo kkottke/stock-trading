@@ -41,6 +41,6 @@ public class QuoteGeneratorVerticle extends AbstractVerticle {
     }
 
     private void publishQuote(Quote quote) {
-        eventBus.publish(ADDRESS, Json.encode(quote));
+        eventBus.publish(ADDRESS, quote.toJson());
     }
 }

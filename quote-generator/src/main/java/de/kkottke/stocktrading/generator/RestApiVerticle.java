@@ -4,6 +4,7 @@ import de.kkottke.stocktrading.common.model.Quote;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.core.http.HttpServerResponse;
 import io.vertx.reactivex.ext.web.Router;
@@ -34,8 +35,8 @@ public class RestApiVerticle extends AbstractVerticle {
     }
 
     private void registerConsumer() {
-        vertx.eventBus().<String>consumer(QuoteGeneratorVerticle.ADDRESS, message -> {
-            Quote quote = Json.decodeValue(message.body(), Quote.class);
+        vertx.eventBus().<JsonObject>consumer(QuoteGeneratorVerticle.ADDRESS, message -> {
+            Quote quote = Json.decodeValue(message.body().encode(), Quote.class);
             quotes.put(quote.getSymbol(), quote);
         });
     }
