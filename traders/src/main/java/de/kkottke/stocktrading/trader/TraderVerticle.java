@@ -29,12 +29,12 @@ public class TraderVerticle extends BaseVerticle {
 
     @Override
     public Completable rxStart() {
-        log.debug("starting TraderVerticle");
         Completable parentCompletable = super.rxStart();
 
         this.company = Company.valueOf(config().getString(CONFIG_COMPANY, DEFAULT_COMPANY));
+        log.debug("starting TraderVerticle for company {}", company.getName());
         this.strategy = new SimpleTradingStrategy();
-        // TODO use service discovery
+        // TODO try to get rxified service via service discovery
         this.tradingService = de.kkottke.stocktrading.trading.TradingService.createRxProxy(vertx.getDelegate());
         Completable registerConsumer = MessageSource.<JsonObject>rxGetConsumer(serviceDiscovery, new JsonObject().put("name", "market-data-stream"))
             .map(consumer -> consumer.handler(this::handleQuote))
@@ -59,20 +59,24 @@ public class TraderVerticle extends BaseVerticle {
     private void buyStocks(TradingEvent tradingEvent, Quote quote) {
         log.debug("try to buy {} of {}", tradingEvent.getAmount(), quote.getName());
         tradingService.rxBuyStock(tradingEvent.getAmount(), quote.toJson())
-                      .subscribe(portfolio -> log.debug("purchase of {} stocks of {} succeeded, current share {}",
-                                                        tradingEvent.getAmount(),
-                                                        quote.getName(),
-                                                        portfolio.getShares().get(quote.getName())),
-                                 error -> log.warn("purchase failed: {}", error.getMessage()));
+                      .subscribe(
+                          portfolio -> log.debug(
+                              "purchase of {} stocks of {} succeeded, current share {}",
+                              tradingEvent.getAmount(),
+                              quote.getName(),
+                              portfolio.getShares().get(quote.getName())),
+                          error -> log.warn("purchase failed: {}", error.getMessage()));
     }
 
     private void sellStocks(TradingEvent tradingEvent, Quote quote) {
         log.debug("try to sell {} of {}", tradingEvent.getAmount(), quote.getName());
         tradingService.rxSellStock(tradingEvent.getAmount(), quote.toJson())
-                      .subscribe(portfolio -> log.debug("sale of {} stocks of {} succeeded, current share {}",
-                                                        tradingEvent.getAmount(),
-                                                        quote.getName(),
-                                                        portfolio.getShares().get(quote.getName())),
-                                 error -> log.warn("sale failed: {}", error.getMessage()));
+                      .subscribe(
+                          portfolio -> log.debug(
+                              "sale of {} stocks of {} succeeded, current share {}",
+                              tradingEvent.getAmount(),
+                              quote.getName(),
+                              portfolio.getShares().get(quote.getName())),
+                          error -> log.warn("sale failed: {}", error.getMessage()));
     }
 }

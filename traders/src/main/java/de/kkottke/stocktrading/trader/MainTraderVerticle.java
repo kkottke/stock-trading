@@ -34,17 +34,13 @@ public class MainTraderVerticle extends AbstractVerticle {
         Single<JsonObject> retrievedConfig = ConfigRetriever.create(vertx)
                                                             .rxGetConfig()
                                                             .cache();
-        Completable deployments = Flowable.fromArray(
-            deployTraderVerticles(retrievedConfig)
-        ).flatMapCompletable(comp -> comp);
 
-        return deployments;
+        return deployTraderVerticles(retrievedConfig);
     }
 
     private Completable deployTraderVerticles(Single<JsonObject> config) {
-        Company[] companies = new Company[] { Company.CRYPTO_CURRENCY_CONSULTING };
         return config.toFlowable()
-                     .flatMap(conf -> Flowable.fromArray(companies)
+                     .flatMap(conf -> Flowable.fromArray(Company.values())
                                               .map(company -> new DeploymentOptions().setConfig(conf.copy()
                                                                                                     .put(CONFIG_COMPANY, company.name()))))
                      .map(option -> vertx.rxDeployVerticle(TraderVerticle::new, option))
