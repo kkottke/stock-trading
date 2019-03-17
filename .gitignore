@@ -4,5 +4,4 @@
 .settings/
 
 target/
-.env
 .DS_Store

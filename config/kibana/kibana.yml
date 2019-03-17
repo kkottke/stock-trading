@@ -1,0 +1,11 @@
+server.port: 127.0.0.1:5601
+elasticsearch.url: "http://elasticsearch:9200"
+server.name: "kibana-server"
+
+# Configure monitoring
+xpack.monitoring:
+  enabled: true
+  elasticsearch:
+    url: "http://elasticsearch:9200"
+    username: "${ES_USERNAME:elastic}"
+    password: "${ES_PASSWORD:changeme}"
